@@ -126,11 +126,11 @@ module uart_receiver
         end
         if (do_sample) begin
             buffer[sample_count] <= signal_in; // value will be available in the next cycle
-            // if (sample_count == DATA_BITS + START_BITS - 1) begin // a more lenient implementation, we don't care about stop bits
-            if (sample_count == MAX_SAMPLE_COUNT - 1) begin // a more strict implementation, we can verify stop bits
+            if (sample_count == DATA_BITS + START_BITS - 1) begin // a more lenient implementation, we don't care about stop bits
+            //if (sample_count == MAX_SAMPLE_COUNT - 1) begin // a more strict implementation, we can verify stop bits
                 scanning <= 1'b0;
-                data_out <= buffer[DATA_BITS:1]; // value is not currently fully available, but will be available in the next cycle
-                //data_out <= {signal_in, buffer[DATA_BITS-1:1]};
+                // data_out <= buffer[DATA_BITS:1]; // value is not currently fully available, but will be available in the next cycle
+                data_out <= {signal_in, buffer[DATA_BITS-1:1]}; // spit out the value as soon as possible
                 data_valid <= 1'b1;
                 sample_count <= 0;
             end else
