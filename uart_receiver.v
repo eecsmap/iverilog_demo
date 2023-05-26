@@ -23,12 +23,16 @@ module test();
     // normally in PYNQ 125_000_000 / 115_200 = 1085, yet I want to test the extreme case here
     localparam cycles_per_symbol = 1;
     localparam symbol_length = cycles_per_symbol * `HALF_CYCLE_LENGTH * 2;
-    localparam stop_bits = 2;
+    localparam stop_bits = 1;
 
     reg data_ready = 0;
     wire data_valid;
 
-    uart_receiver #(.CYCLES_PER_SYMBOL(cycles_per_symbol), .STOP_BITS(stop_bits)) ur(
+    uart_receiver
+    #(
+        .CYCLES_PER_SYMBOL(cycles_per_symbol),
+        .STOP_BITS(stop_bits)
+    ) ur (
         .clk(clk),
         .signal_in(signal_in),
         .data_ready(data_ready),
@@ -72,7 +76,7 @@ module uart_receiver
     #(
         parameter CYCLES_PER_SYMBOL = 125_000_000 / 115_200,
         parameter DATA_BITS = 8,
-        parameter STOP_BITS = 1 // practically could be 1, 1.5, 2, here we only support 1,2,...
+        parameter STOP_BITS = 1 // must >= 1; practically could be 1, 1.5, 2, here we only support 1,2,...
                                 // A lenient implementation might just check the first half of the first stop bit
     )
     (
@@ -121,11 +125,12 @@ module uart_receiver
             data_valid <= 1'b0;
         end
         if (do_sample) begin
-            buffer[sample_count] <= signal_in;
-            if (sample_count == DATA_BITS + 1) begin // a more lenient implementation, we don't care about stop bits
-            //if (sample_count == MAX_SAMPLE_COUNT - 1) begin // a more strict implementation, we can verify stop bits
+            buffer[sample_count] <= signal_in; // value will be available in the next cycle
+            // if (sample_count == DATA_BITS + START_BITS - 1) begin // a more lenient implementation, we don't care about stop bits
+            if (sample_count == MAX_SAMPLE_COUNT - 1) begin // a more strict implementation, we can verify stop bits
                 scanning <= 1'b0;
-                data_out <= buffer[DATA_BITS:1];
+                data_out <= buffer[DATA_BITS:1]; // value is not currently fully available, but will be available in the next cycle
+                //data_out <= {signal_in, buffer[DATA_BITS-1:1]};
                 data_valid <= 1'b1;
                 sample_count <= 0;
             end else
