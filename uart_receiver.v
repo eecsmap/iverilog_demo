@@ -17,7 +17,7 @@ module test();
     // ==================================================
     // setup uart receiver input and output signals
     // ==================================================
-    reg [0:7] data_out;
+    reg [7:0] data_out;
     reg signal_in = 1'b1; // idle as high level according to the spec
 
     // normally in PYNQ 125_000_000 / 115_200 = 1085, yet I want to test the extreme case here
@@ -83,7 +83,7 @@ module uart_receiver
         input clk,
         input signal_in,
         input data_ready, // sink is ready to accept data
-        output reg [0:7] data_out,
+        output reg [7:0] data_out,
         output reg data_valid // data is valid from source
     );
     localparam MAX_CYCLE_COUNT = CYCLES_PER_SYMBOL;
