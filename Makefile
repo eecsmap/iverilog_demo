@@ -1,4 +1,4 @@
-uart_receiver.fst:
+all: uart_receiver.fst uart_transmitter.fst
 
 %.fst: %.vvp
 	vvp $< -fst
